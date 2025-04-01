@@ -116,11 +116,73 @@ statefulset.apps/argocd-application-controller   1/1     106m
 
 ### 4. Access the ArgoCD UI
 
-To access the ArgoCD UI, you need to modify the service to use NodePort:
+There are multiple ways to access the ArgoCD UI depending on your environment. Here are the most reliable methods:
+
+#### Option 1: Port Forwarding (Recommended for all platforms)
+
+The most reliable method across all platforms (Linux, macOS, Windows) is using port forwarding:
 
 ```bash
-kubectl edit svc argocd-server -n argocd  # Change service type to NodePort
+kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
+
+Then access ArgoCD UI at:
+```
+https://localhost:8080
+```
+
+When prompted about the certificate, click "Advanced" and then "Proceed" (wording may vary by browser) as ArgoCD uses a self-signed certificate.
+
+#### Option 2: Using NodePort
+
+You can modify the service to use NodePort:
+
+```bash
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+```
+
+After changing the service type, find the assigned NodePort:
+
+```bash
+kubectl get svc argocd-server -n argocd
+```
+
+You should see output similar to:
+
+```
+NAME            TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+argocd-server   NodePort   10.98.71.135    <none>        80:30007/TCP,443:30008/TCP   120m
+```
+
+Note the NodePort (in this example, 30007 for HTTP and 30008 for HTTPS).
+
+For standard Kubernetes clusters, access using:
+
+```
+https://<node-ip>:<nodeport>
+```
+
+#### Option 3: For Minikube Specific Access
+
+For Minikube users, you can use:
+
+```bash
+minikube service argocd-server -n argocd --url
+```
+
+This will provide URLs you can use to access the service.
+
+Alternatively, you can run:
+
+```bash
+minikube service argocd-server -n argocd
+```
+
+This will automatically open your browser with the correct URL.
+
+**Note for macOS/Docker Driver users**: 
+- When using Minikube with Docker driver on macOS, you may need to keep the terminal window open when using `minikube service` commands
+- Port forwarding (Option 1) is generally more reliable in this environment
 
 ### 5. Get login credentials
 
