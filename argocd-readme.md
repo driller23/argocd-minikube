@@ -408,7 +408,7 @@ Workflow
 
 Manifest file
 
-![ArgoCD Manifest file](https://github.com/driller23/argocd-minikube/blob/main/0_nHynQ_-YYFe3gGtN.webp)
+![ArgoCD Manifest file](https://github.com/driller23/argocd-minikube/blob/main/0_8UK0SrSONqqYHA7j.webp)
 
 
 Manifest file
