@@ -4,7 +4,7 @@
 
 Argo CD is a Kubernetes-native continuous deployment (CD) tool. Unlike traditional external CD tools that rely on push-based deployments, Argo CD can pull updated code from Git repositories and deploy it directly to Kubernetes resources, enabling a GitOps workflow.
 
-![ArgoCD Architecture](https://raw.githubusercontent.com/youruser/yourrepo/main/images/argocd.png)
+![ArgoCD Architecture]()
 
 ## What is GitOps?
 
