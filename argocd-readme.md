@@ -413,10 +413,13 @@ Manifest file
 
 Manifest file
 
-![Manifest file](https://github.com/driller23/argocd-minikube/blob/main/0_nHynQ_-YYFe3gGtN.webp)
+![Manifest file](https://github.com/driller23/argocd-minikube/blob/main/0_J5H5GJLVdGhPQdm5.webp)
 
 
 Events of pod creation
+
+![Events of pod creation](https://github.com/driller23/argocd-minikube/blob/main/0_J5H5GJLVdGhPQdm5.webp)
+
 
 Now let’s say you want to increase the replica for your application. You just need to commit your changes in the git repository deployment.yml
 Changes
