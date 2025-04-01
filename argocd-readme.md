@@ -12,8 +12,6 @@ GitOps is a modern approach to implementing Continuous Deployment for cloud-nati
 
 The fundamental concept of GitOps is maintaining a Git repository that contains declarative descriptions of the infrastructure desired in your production environment, coupled with an automated process that ensures the production environment matches the described state in the repository. With this approach, deploying or updating applications simply requires updating the repository—the automated process handles everything else. It's essentially cruise control for your production application management.
 
-![GitOps Flow](https://raw.githubusercontent.com/youruser/yourrepo/main/images/gitops.png)
-
 ## How to Implement GitOps using Argo CD
 
 Most organizations use Git for source code management. With GitOps, developers commit infrastructure configurations (like Kubernetes resource definitions) to Git repositories to create environments for application deployment.
@@ -330,6 +328,103 @@ myapp-deployment-544dd58bc4-wkf5j   1/1     Running   0          13h
 myapp-deployment-544dd58bc4-xt7hb   1/1     Running   0          13h
 myapp-deployment-544dd58bc4-zjmn8   1/1     Running   0          13h
 ```
+
+So, now in order for argoCD to sync with this repository we need to write some manifest file for that. Here is the manifest file for that.
+
+```
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp-argo-application
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/CloudTechDevOps/Kubernetes.git
+    targetRevision: HEAD
+    path: day-14-argocd
+  destination: 
+    server: https://kubernetes.default.svc
+    namespace: myapp
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+
+    automated:
+      selfHeal: true
+      prune: true
+```
+
+argoproj.io/v1alpha1 is an API version of argoCD. The API Version might get changed once argoCD has some new release. Always refer to the documentation for the latest information.
+I am defining my repository URL in repoURL section.
+targetRevision is set to HEAD so that it will always fetch the latest commit.
+path is set to ‘day-14-argocd’ because I have my application’s manifest files in ‘day-14-argocd’ folder.
+In the destination section we have server section and it is set to https://kubernetes.default.svc which is the internal service of the kubernetes API Server.
+
+```
+ubuntu@ip-172-31-7-106:~$ kubectl get svc 
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   137m
+ubuntu@ip-172-31-7-106:~$
+```
+
+namespace is set to myapp , because we want to create our application in that namespace. Now, we actually don’t have the namespace already created because we want argoCD to create that automatically.
+In order for argoCD to create the namespace automatically we need to define the below attributes.
+
+```
+syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+```
+
+We want argoCD to automatically sync any changes in the git repository but by default, it is turned off. So in order to enable that we need to define the below attributes.
+
+```
+automated:
+  selfHeal: true
+  prune: true
+```
+
+If you apply any changes from the backend using kubectl utility then we want to override that with whatever we have in our git repository in order to do that we have selfHeal: true for that.
+If we rename any component or delete the entire component then we want argoCD to delete that component in the cluster as well and in order to do that we have prune: true for that.
+argoCD will check the changes in the git repository every 3 minutes. If you want argoCD to check the changes as soon as it has done then you can implement the webhook for that.
+Now, that we have our file ready we need to run the below command to apply that.
+kubectl apply -f application.yaml
+Once you apply the file you can check your application in the UI.
+
+Application
+
+![ArgoCD Application](https://github.com/driller23/argocd-minikube/blob/main/0_WKcysNPYn7hhs9pW.webp)
+
+
+You can click on your application and check the various details.
+
+Workflow
+
+![ArgoCD Workflow](https://github.com/driller23/argocd-minikube/blob/main/0_27hbSlQfAydxI8Xy.webp)
+
+
+Manifest file
+
+![ArgoCD Manifest file](https://github.com/driller23/argocd-minikube/blob/main/0_nHynQ_-YYFe3gGtN.webp)
+
+
+Manifest file
+
+![Manifest file](https://github.com/driller23/argocd-minikube/blob/main/0_nHynQ_-YYFe3gGtN.webp)
+
+
+Events of pod creation
+
+Now let’s say you want to increase the replica for your application. You just need to commit your changes in the git repository deployment.yml
+Changes
+
+As soon as you commit the changes in the repository, argoCD will look for the changes and apply the changes in the cluster.
+
+
+
 
 ## Advanced Configuration
 
